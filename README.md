@@ -12,3 +12,19 @@ This project demonstrates two fundamental image processing techniques using Open
 
 ## 📁 Project Structure
 
+
+---
+
+## ⚙️ Step-by-Step Setup
+
+### 1. ✅ Create and Activate a Virtual Environment
+
+Open a terminal in the project folder and run:
+
+**For Windows:**
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+
