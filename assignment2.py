@@ -15,25 +15,25 @@ def save_plot(image, title, filename):
     plt.savefig(os.path.join("output", filename), bbox_inches='tight')
     plt.close()
 
-# Step 1: Create a synthetic image with 2 objects and background
-def create_synthetic_image():
-    img = np.zeros((100, 100), dtype=np.uint8)
-    cv2.rectangle(img, (20, 20), (40, 80), 85, -1)   # Object 1 (gray level 85)
-    cv2.circle(img, (70, 50), 15, 170, -1)           # Object 2 (gray level 170)
+# Load grayscale image
+def load_image(filepath):
+    img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
+    if img is None:
+        raise FileNotFoundError(f"Image not found at path: {filepath}")
     return img
 
-# Step 2: Add Gaussian noise
+# Add Gaussian noise
 def add_gaussian_noise(image, mean=0, std=15):
     noise = np.random.normal(mean, std, image.shape).astype(np.int16)
     noisy_img = np.clip(image.astype(np.int16) + noise, 0, 255).astype(np.uint8)
     return noisy_img
 
-# Step 3: Apply Otsu’s thresholding
+# Apply Otsu's threshold
 def apply_otsu(image):
     _, otsu_thresh = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return otsu_thresh
 
-# Step 4: Region Growing Implementation
+# Region growing algorithm
 def region_growing(image, seed, threshold=10):
     output = np.zeros_like(image)
     visited = np.zeros_like(image, dtype=bool)
@@ -54,27 +54,36 @@ def region_growing(image, seed, threshold=10):
                     queue.append((nx, ny))
     return output
 
-# Execute Part 1
-img = create_synthetic_image()
-noisy_img = add_gaussian_noise(img)
-otsu_result = apply_otsu(noisy_img)
+# TASK 1: Noise + Otsu
+def task1(filepath):
+    img = load_image(filepath)
+    noisy_img = add_gaussian_noise(img)
+    otsu_result = apply_otsu(noisy_img)
 
-# Save plots for Part 1
-save_plot(img, "Original Image", "original.png")
-save_plot(noisy_img, "Noisy Image", "noisy.png")
-save_plot(otsu_result, "Otsu Threshold", "otsu_result.png")
+    # Save outputs
+    save_plot(img, "Task 1 - Original Image", "task1_original.png")
+    save_plot(noisy_img, "Task 1 - Noisy Image", "task1_noisy.png")
+    save_plot(otsu_result, "Task 1 - Otsu Result", "task1_otsu_result.png")
 
-# Execute Part 2: Region Growing
-seed1 = (30, 30)  # Inside rectangle
-seed2 = (70, 50)  # Inside circle
+    return img
 
-region1 = region_growing(img, seed1, threshold=15)
-region2 = region_growing(img, seed2, threshold=15)
-combined = cv2.bitwise_or(region1, region2)
+# TASK 2: Region Growing
+def task2(image):
+    seed1 = (30, 30)  # You may update these seed points for your image
+    seed2 = (70, 50)
 
-# Save plots for Part 2
-save_plot(region1, "Region 1", "region1.png")
-save_plot(region2, "Region 2", "region2.png")
-save_plot(combined, "Combined Regions", "combined_regions.png")
+    region1 = region_growing(image, seed1, threshold=15)
+    region2 = region_growing(image, seed2, threshold=15)
+    combined = cv2.bitwise_or(region1, region2)
 
-print("All plots saved in the 'output' folder.")
+    # Save outputs
+    save_plot(region1, "Task 2 - Region 1", "task2_region1.png")
+    save_plot(region2, "Task 2 - Region 2", "task2_region2.png")
+    save_plot(combined, "Task 2 - Combined Regions", "task2_combined.png")
+
+# --- MAIN EXECUTION ---
+if __name__ == "__main__":
+    image_path = "original_image.jpg"
+    img = task1(image_path)
+    task2(img)
+    print("All task outputs saved in the 'output' folder.")
